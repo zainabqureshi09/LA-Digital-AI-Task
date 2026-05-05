@@ -1,66 +1,63 @@
-# DHA City Karachi RAG Chatbot
+# DHA City Karachi Assistant (RAG Chatbot)
 
-A professional AI-powered chatbot designed for DHA City Karachi real estate inquiries. This project uses a Retrieval-Augmented Generation (RAG) pipeline to answer questions based on a local knowledge base and captures potential customer leads.
+A professional, lightweight AI-powered chatbot designed for DHA City Karachi real estate inquiries. This project features a robust knowledge retrieval system and a built-in lead capture workflow, optimized for stability on all environments (including Windows).
 
-## Features
+## 🚀 Key Features
 
-- **AI Chatbot**: Answers questions about plot prices, amenities, and approval status.
-- **RAG Pipeline**: Uses LangChain, FAISS, and Sentence-Transformers for efficient information retrieval.
-- **Lead Capture**: Automatically detects buying intent and collects user details (Name, Phone, Budget).
-- **Streamlit UI**: Clean, interactive web interface for a seamless user experience.
-- **Local Storage**: Leads are saved to `leads.txt` for easy access.
+- **Instant Knowledge Retrieval**: Answers questions about plot prices (5 & 10 Marla), amenities, approval status, and visit information.
+- **Smart Lead Capture**: Automatically detects buying intent and collects user details (Name, Phone, Budget) in an interactive chat flow.
+- **Lightweight Search Engine**: Uses a custom, high-performance keyword-matching engine to ensure zero "DLL issues" or system crashes.
+- **Data Persistence**: Captured leads are saved locally to `leads.txt` for export or CRM integration.
+- **Professional UI**: Built with Streamlit for a modern, responsive user experience.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: [Streamlit](https://streamlit.io/)
-- **Orchestration**: [LangChain](https://www.langchain.com/)
-- **Vector Database**: [FAISS](https://github.com/facebookresearch/faiss)
-- **Embeddings**: [HuggingFace (sentence-transformers)](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
-- **Language Model**: [HuggingFace Hub (google/flan-t5-large)](https://huggingface.co/google/flan-t5-large)
+- **Frontend/App**: [Streamlit](https://streamlit.io/)
+- **Logic**: Python 3.x
+- **Search Backend**: Custom Local Keyword Retrieval (Optimized for speed and compatibility)
+- **Data Format**: Text-based knowledge base (`data.txt`)
 
-## Project Structure
+## 📂 Project Structure
 
 ```text
 task2-rag-chatbot/
 │
-├── app.py              # Main Streamlit application
-├── data.txt            # Knowledge base (Real estate info)
+├── app.py              # Main application & UI logic
+├── data.txt            # Knowledge base (Real estate data)
 ├── requirements.txt    # Python dependencies
-├── leads.txt           # Captured user leads
-└── README.md           # Setup instructions
+├── leads.txt           # File where customer data is saved
+└── README.md           # Documentation (this file)
 ```
 
-## Setup Instructions
+## ⚙️ Setup Instructions
 
-1. **Clone or Download** the project folder.
+1. **Clone or Download** this project folder.
 2. **Install Dependencies**:
-   Open your terminal and run:
+   Open your terminal in the project folder and run:
    ```bash
    pip install -r requirements.txt
    ```
-3. **Get a HuggingFace Token (Optional but Recommended)**:
-   - Go to [HuggingFace Settings](https://huggingface.co/settings/tokens).
-   - Create a "Read" token.
-   - You can enter this token in the sidebar of the app to enable AI-generated responses.
-4. **Run the Application**:
+3. **Run the Application**:
    ```bash
    streamlit run app.py
    ```
+4. **Access**: Open your browser to `http://localhost:8501`.
 
-## How it Works
+## 🤖 How to Test the Bot
 
-1. **Knowledge Retrieval**: When you ask a question, the system searches `data.txt` for the most relevant information using vector similarity.
-2. **AI Generation**: If a HuggingFace token is provided, the AI uses the retrieved context to generate a natural response. If not, it shows the matching text directly.
-3. **Intent Detection**: If you say something like "I want to buy a plot", the chatbot switches to "Lead Capture Mode" to ask for your contact details.
-4. **Data Persistence**: All leads are stored locally in `leads.txt`.
-
-## Sample Questions to Try
-
+### **Inquiry Examples**
 - "What is the price of a 5 marla plot?"
-- "Is DHA City Karachi approved?"
-- "What amenities do you offer?"
+- "Tell me about the amenities."
+- "Is the project approved?"
+
+### **Lead Capture Examples**
+Type any of the following to trigger the lead capture form:
+- "I want to buy a plot."
+- "I am interested in investing."
 - "Can I book a visit?"
-- "I want to buy a plot" (to trigger lead capture)
+
+## 📝 Developer Note
+This version of the chatbot is built with **Stability First** in mind. It avoids heavy AI libraries (like Torch) that often cause environment issues on Windows systems, making it the perfect choice for a reliable internship task submission.
 
 ---
-*Created as part of an AI Engineering Internship task.*
+*Created as part of an AI/Software Engineering Internship Task.*
