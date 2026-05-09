@@ -1,139 +1,191 @@
 from pptx import Presentation
 from pptx.util import Inches, Pt
-from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE
 import os
 
-def add_slide(prs, title_text, content_text=None, layout_index=1):
-    slide_layout = prs.slide_layouts[layout_index]
-    slide = prs.slides.add_slide(slide_layout)
-    title = slide.shapes.title
-    title.text = title_text
-    
-    if content_text:
-        body_shape = slide.placeholders[1]
-        tf = body_shape.text_frame
-        tf.text = content_text
-    return slide
+# ================= THEME =================
+BG = RGBColor(15, 23, 42)        # dark navy
+WHITE = RGBColor(255, 255, 255)
+ACCENT = RGBColor(0, 255, 180)
+GRAY = RGBColor(148, 163, 184)
+CARD_BG = RGBColor(30, 41, 59)
 
-def set_slide_background(slide, color):
-    background = slide.background
-    fill = background.fill
+# ================= HELPERS =================
+
+def set_bg(slide):
+    fill = slide.background.fill
     fill.solid()
-    fill.fore_color.rgb = color
+    fill.fore_color.rgb = BG
 
-def main():
+def text(shape, size=24, bold=False, color=WHITE):
+    tf = shape.text_frame
+    p = tf.paragraphs[0]
+    p.font.size = Pt(size)
+    p.font.bold = bold
+    p.font.color.rgb = color
+
+def title(slide, txt):
+    box = slide.shapes.add_textbox(Inches(0.8), Inches(0.5), Inches(9), Inches(1))
+    box.text = txt
+    text(box, size=34, bold=True)
+    return box
+
+def card(slide, x, y, w, h, t, d):
+    shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = CARD_BG
+    shape.line.color.rgb = ACCENT
+
+    tf = shape.text_frame
+    tf.clear()
+
+    p1 = tf.paragraphs[0]
+    p1.text = t
+    p1.font.size = Pt(16)
+    p1.font.bold = True
+    p1.font.color.rgb = WHITE
+
+    p2 = tf.add_paragraph()
+    p2.text = d
+    p2.font.size = Pt(11)
+    p2.font.color.rgb = GRAY
+
+    return shape
+
+# ================= CANVA-STYLE ANIMATION =================
+
+def animated_steps(prs, builder, items):
+    """
+    Simulates Canva-like animation by progressive slides
+    """
+    for i in range(1, len(items) + 1):
+        slide = prs.slides.add_slide(prs.slide_layouts[6])
+        builder(slide, items[:i])
+
+# ================= SECTION BREAK =================
+
+def section(prs, txt):
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide)
+
+    box = slide.shapes.add_textbox(Inches(1), Inches(2.5), Inches(8), Inches(2))
+    box.text = txt
+    text(box, size=40, bold=True, color=ACCENT)
+
+# ================= SLIDE BUILDERS =================
+
+def feature_builder(slide, items):
+    set_bg(slide)
+    title(slide, "AI CHATBOT FEATURES")
+
+    x, y = 0.6, 1.5
+    for i, f in enumerate(items):
+        card(slide, Inches(x), Inches(y), Inches(3), Inches(1.4),
+             f, "Automated AI-powered system")
+        x += 3.2
+        if (i + 1) % 3 == 0:
+            x = 0.6
+            y += 1.8
+
+def roi_builder(prs):
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide)
+    title(slide, "BUSINESS IMPACT")
+
+    card(slide, Inches(1), Inches(2), Inches(8), Inches(3),
+         "Expected ROI",
+         "• 30% more leads\n• 90% faster replies\n• 50% less manual workload\n• Higher conversions")
+
+# ================= MAIN =================
+
+def build_pro_deck():
     prs = Presentation()
 
-    # Define Colors
-    NAVY = RGBColor(0, 32, 96)
-    WHITE = RGBColor(255, 255, 255)
-    GRAY = RGBColor(128, 128, 128)
+    # ========== COVER ==========
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide)
 
-    # 1. Cover Page
-    slide = prs.slides.add_slide(prs.slide_layouts[0])
-    set_slide_background(slide, NAVY)
-    
-    title = slide.shapes.title
-    title.text = "AI Chatbot for Lead Generation"
-    title.text_frame.paragraphs[0].font.color.rgb = WHITE
-    title.text_frame.paragraphs[0].font.size = Pt(44)
-    title.text_frame.paragraphs[0].font.bold = True
+    t = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(8), Inches(2))
+    t.text = "AI CHATBOT FOR LEAD GENERATION"
+    text(t, size=42, bold=True)
 
-    subtitle = slide.placeholders[1]
-    subtitle.text = "Prepared for Marketing Clients by LA Digital Agency"
-    subtitle.text_frame.paragraphs[0].font.color.rgb = WHITE
-    subtitle.text_frame.paragraphs[0].font.size = Pt(24)
+    s = slide.shapes.add_textbox(Inches(1), Inches(3.3), Inches(8), Inches(1))
+    s.text = "LA Digital Agency • Premium Automation Solutions"
+    text(s, size=16, color=ACCENT)
 
-    # 2. Problem Statement
-    slide = add_slide(prs, "Problem Statement", 
-                     "• Slow customer response times\n"
-                     "• Lost leads from websites and social media\n"
-                     "• Manual handling of customer inquiries\n"
-                     "• Low conversion rates due to delayed engagement")
+    # ========== PROBLEM ==========
+    section(prs, "PROBLEM STATEMENT")
 
-    # 3. Solution Overview
-    slide = add_slide(prs, "Solution Overview", 
-                     "Our AI Chatbot acts as your 24/7 Digital Sales Assistant:\n\n"
-                     "• Automatically responds to visitors instantly\n"
-                     "• Captures lead information without human intervention\n"
-                     "• Qualifies leads by budget and interest level\n"
-                     "• Hands off high-quality leads to your sales team in real-time")
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide)
+    title(slide, "Key Issues")
 
-    # 4. Key Features
-    slide = add_slide(prs, "Key Features", 
-                     "• Instant AI Replies\n"
-                     "• Smart Lead Capture Forms\n"
-                     "• Budget & Interest Qualification\n"
-                     "• WhatsApp & Website Integration\n"
-                     "• CRM & Google Sheets Sync\n"
-                     "• Automated Appointment Booking")
+    card(slide, Inches(0.7), Inches(1.6), Inches(4), Inches(2),
+         "Slow Response", "Customers wait too long")
 
-    # 5. Sample Chatbot Demo
-    slide = add_slide(prs, "Sample Chatbot Demo")
-    # Add mockup image
-    img_path = 'task4-ai-proposal/screenshots/chatbot_demo.png'
-    if os.path.exists(img_path):
-        slide.shapes.add_picture(img_path, Inches(1), Inches(1.5), height=Inches(5))
-    else:
-        # Fallback text
-        body = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(8), Inches(3))
-        body.text = "User: 'I want to buy a plot'\nBot: 'Great! Please share your name, phone number, and budget.'"
+    card(slide, Inches(5), Inches(1.6), Inches(4), Inches(2),
+         "Lost Leads", "No instant engagement")
 
-    # 6. Pricing
-    slide = add_slide(prs, "Investment Plan")
-    table_placeholder = slide.shapes.add_table(3, 2, Inches(1), Inches(2), Inches(8), Inches(2.5)).table
-    table_placeholder.columns[0].width = Inches(5)
-    table_placeholder.columns[1].width = Inches(3)
-    
-    table_placeholder.cell(0, 0).text = "Service Item"
-    table_placeholder.cell(0, 1).text = "Investment (PKR)"
-    table_placeholder.cell(1, 0).text = "One-time Setup Fee"
-    table_placeholder.cell(1, 1).text = "80,000"
-    table_placeholder.cell(2, 0).text = "Monthly Maintenance & AI Usage"
-    table_placeholder.cell(2, 1).text = "25,000 / mo"
+    card(slide, Inches(0.7), Inches(4), Inches(4), Inches(2),
+         "Manual Work", "High workload on staff")
 
-    # 7. ROI / Benefits
-    slide = add_slide(prs, "ROI & Business Benefits", 
-                     "• 30% Increase in Lead Volume\n"
-                     "• 90% Faster Response Times\n"
-                     "• 50% Reduction in Manual Qualifying Work\n"
-                     "• Higher Conversion Rates from Web Traffic\n"
-                     "• Superior Customer Experience")
+    card(slide, Inches(5), Inches(4), Inches(4), Inches(2),
+         "Low Conversion", "Delayed replies lose sales")
 
-    # 8. Tech Stack
-    slide = add_slide(prs, "Advanced Tech Stack", 
-                     "• Python & Streamlit (Core Engine)\n"
-                     "• LangChain (LLM Orchestration)\n"
-                     "• OpenAI API (Natural Language Understanding)\n"
-                     "• FAISS (Vector Store for Knowledge Base)\n"
-                     "• Google Sheets API (Data Storage)")
+    # ========== SOLUTION ==========
+    section(prs, "AI SOLUTION")
 
-    # 9. Implementation Timeline
-    slide = add_slide(prs, "Project Timeline")
-    # Simple bullet points for timeline
-    tf = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(8), Inches(3)).text_frame
-    p1 = tf.add_paragraph()
-    p1.text = "Day 1-2: Development & Customization"
-    p2 = tf.add_paragraph()
-    p2.text = "Day 3: Intensive Testing & Refinement"
-    p3 = tf.add_paragraph()
-    p3.text = "Day 4: Final Deployment & Live Integration"
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide)
+    title(slide, "24/7 AI Sales Assistant")
 
-    # 10. Final Thank You Page
-    slide = prs.slides.add_slide(prs.slide_layouts[0])
-    set_slide_background(slide, NAVY)
-    
-    title = slide.shapes.title
-    title.text = "Thank You!"
-    title.text_frame.paragraphs[0].font.color.rgb = WHITE
-    
-    subtitle = slide.placeholders[1]
-    subtitle.text = "Contact LA Digital Agency to get started.\nEmail: info@ladigital.agency | Web: www.ladigital.agency"
-    subtitle.text_frame.paragraphs[0].font.color.rgb = WHITE
+    card(slide, Inches(1), Inches(2), Inches(8), Inches(3),
+         "Smart Automation Engine",
+         "Instant replies • Lead capture • Qualification • CRM sync • WhatsApp integration")
 
-    prs.save('task4-ai-proposal/proposal.pptx')
-    print("Proposal generated successfully: task4-ai-proposal/proposal.pptx")
+    # ========== ANIMATED FEATURES ==========
+    features = [
+        "Instant AI Replies",
+        "Smart Lead Capture",
+        "WhatsApp Integration",
+        "CRM Sync",
+        "Auto Booking",
+        "Lead Qualification"
+    ]
+
+    animated_steps(prs, feature_builder, features)
+
+    # ========== ROI ==========
+    roi_builder(prs)
+
+    # ========== PRICING ==========
+    section(prs, "PRICING")
+
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide)
+    title(slide, "Investment Plan")
+
+    card(slide, Inches(1), Inches(2), Inches(4), Inches(3),
+         "Setup Fee", "PKR 80,000\nOne-time")
+
+    card(slide, Inches(5), Inches(2), Inches(4), Inches(3),
+         "Monthly", "PKR 25,000\nAI + Maintenance")
+
+    # ========== FINAL ==========
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_bg(slide)
+
+    t = slide.shapes.add_textbox(Inches(1), Inches(2), Inches(8), Inches(2))
+    t.text = "THANK YOU"
+    text(t, size=44, bold=True, color=ACCENT)
+
+    c = slide.shapes.add_textbox(Inches(1), Inches(3.5), Inches(8), Inches(1))
+    c.text = "LA Digital Agency | info@ladigital.agency"
+    text(c, size=16)
+
+    prs.save("PRO_AI_PITCH_DECK.pptx")
+    print("PRO deck generated successfully!")
 
 if __name__ == "__main__":
-    main()
+    build_pro_deck()
